@@ -46,7 +46,16 @@ cog.out(open("aider/website/_includes/get-started.md").read())
 If you already have python 3.8-3.13 installed, you can get started quickly like this:
 
 ```bash
+# Install with pip
 python -m pip install aider-install
+
+# Or install with uv (recommended)
+uv pip install aider-install
+
+# For developers (with uv)
+git clone https://github.com/paul-gauthier/aider.git
+cd aider
+uv pip install -e .
 aider-install
 
 # Change directory into your code base

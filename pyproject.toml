@@ -1,52 +1,108 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
-name = "aider-chat"
-description = "Aider is AI pair programming in your terminal"
+name = "aider"
+dynamic = ["version"]
+description = "AI pair programming in your terminal"
 readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = ["AI", "coding", "pair programming", "GPT", "assistant"]
+authors = [
+    { name = "Paul Butler", email = "aider@paulbutler.org" }
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python",
     "Topic :: Software Development",
 ]
-requires-python = ">=3.9,<3.13"
-dynamic = ["dependencies", "optional-dependencies", "version"]
+dependencies = [
+    "gitpython>=3.1.31",
+    "openai>=1.1.0",
+    "prompt-toolkit>=3.0.38",
+    "rich>=13.3.5",
+    "tiktoken>=0.4.0",
+    "yapf>=0.33.0",
+    "litellm>=1.26.8",
+    "pillow>=10.0.0",
+    "pyyaml>=6.0.1",
+    "json5>=0.9.14",
+    "termcolor>=2.3.0",
+    "colorama>=0.4.6",
+    "platformdirs>=3.10.0",
+    "types-PyYAML>=6.0.12.12",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.3.1",
+    "pytest-cov>=4.1.0",
+    "black>=23.3.0",
+    "ruff>=0.0.291",
+    "mypy>=1.5.1",
+]
+
+gui = [
+    "streamlit>=1.24.0",
+]
+
+voice = [
+    "sounddevice>=0.4.6",
+    "vosk>=0.3.45",
+]
 
 [project.urls]
-Homepage = "https://github.com/Aider-AI/aider"
+Homepage = "https://aider.chat"
+Documentation = "https://aider.chat/docs"
+Repository = "https://github.com/paul-gauthier/aider"
+Issues = "https://github.com/paul-gauthier/aider/issues"
 
 [project.scripts]
-aider = "aider.main:main"
+aider = "aider.__main__:main"
 
-[tool.setuptools.dynamic]
-dependencies = { file = "requirements.txt" }
+[tool.hatch.build]
+exclude = [
+    "tests/*",
+    "docs/*",
+    "examples/*",
+    "scripts/*",
+]
 
-[tool.setuptools.dynamic.optional-dependencies]
-dev = { file = "requirements/requirements-dev.txt" }
-help = { file = "requirements/requirements-help.txt" }
-browser = { file = "requirements/requirements-browser.txt" }
-playwright = { file = "requirements/requirements-playwright.txt" }
+[tool.hatch.version]
+path = "aider/__init__.py"
 
-[tool.setuptools]
-include-package-data = true
+[tool.black]
+line-length = 100
+target-version = ["py38"]
 
-[tool.setuptools.packages.find]
-include = ["aider"]
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+]
 
-[build-system]
-requires = ["setuptools>=68", "setuptools_scm[toml]>=8"]
-build-backend = "setuptools.build_meta"
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
 
-[tool.setuptools_scm]
-write_to = "aider/_version.py"
-
-[tool.codespell]
-skip = "*.svg,Gemfile.lock"
-write-changes = true
+[tool.pytest.ini_options]
+addopts = "--cov=aider --cov-report=term-missing"
+testpaths = ["tests"]
