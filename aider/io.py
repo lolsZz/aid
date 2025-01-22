@@ -19,7 +19,8 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit.output.vt100 import is_dumb_terminal
 from prompt_toolkit.shortcuts import CompleteStyle, PromptSession
-from prompt_toolkit.styles import Style
+from prompt_toolkit.styles import Style, merge_styles
+from .dyslexic_support import DyslexicFriendlyIO
 from pygments.lexers import MarkdownLexer, guess_lexer_for_filename
 from pygments.token import Token
 from rich.columns import Columns
@@ -178,6 +179,7 @@ class InputOutput:
     num_error_outputs = 0
     num_user_asks = 0
     clipboard_watcher = None
+    dyslexic_io = None
 
     def __init__(
         self,
@@ -198,6 +200,7 @@ class InputOutput:
         completion_menu_current_bg_color=None,
         code_theme="default",
         encoding="utf-8",
+        dyslexic_friendly=False,
         line_endings="platform",
         dry_run=False,
         llm_history_file=None,
@@ -291,11 +294,26 @@ class InputOutput:
 
         self.file_watcher = file_watcher
         self.root = root
+        
+        self.dyslexic_friendly = dyslexic_friendly
+        if self.dyslexic_friendly:
+            self.dyslexic_io = DyslexicFriendlyIO()
+            # Override colors with dyslexic-friendly ones
+            colors = self.dyslexic_io.DYSLEXIC_COLORS
+            self.user_input_color = colors['user_input']
+            self.tool_output_color = colors['tool_output']
+            self.tool_error_color = colors['error']
+            self.tool_warning_color = colors['warning']
+            self.completion_menu_bg_color = colors['background']
 
     def _get_style(self):
         style_dict = {}
         if not self.pretty:
             return Style.from_dict(style_dict)
+
+        if self.dyslexic_friendly:
+            dyslexic_style = self.dyslexic_io.style
+            style_dict = merge_styles([Style.from_dict(style_dict), dyslexic_style])
 
         if self.user_input_color:
             style_dict.setdefault("", self.user_input_color)
@@ -815,6 +833,9 @@ class InputOutput:
         return res
 
     def _tool_message(self, message="", strip=True, color=None):
+        if self.dyslexic_friendly and isinstance(message, str):
+            message = self.dyslexic_io.format_text(message, role='tool')
+
         if message.strip():
             if "\n" in message:
                 for line in message.splitlines():
@@ -868,6 +889,9 @@ class InputOutput:
 
     def assistant_output(self, message, pretty=None):
         show_resp = message
+        
+        if self.dyslexic_friendly:
+            show_resp = self.dyslexic_io.format_text(message)
 
         # Coder will force pretty off if fence is not triple-backticks
         if pretty is None:
