@@ -90,10 +90,12 @@ def test_pipe_editor_with_fake_editor():
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".log", delete=False) as log_f:
         log_path = log_f.name
+        # Convert to raw string path to avoid escape issues on Windows
+        log_path_escaped = log_path.replace("\\", "\\\\")
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write(f"""import sys
-with open("{log_path}", "w") as f:
+with open(r"{log_path_escaped}", "w") as f:
     f.write(" ".join(sys.argv))
 """)
         script_path = f.name
@@ -109,7 +111,7 @@ with open("{log_path}", "w") as f:
             called_args = f.read().strip()
 
         # Verify the editor was called with a .md file
-        assert called_args.endswith(".md")
+        assert called_args.endswith(".md"), f"Called args: {called_args!r}"
 
     finally:
         # Clean up
