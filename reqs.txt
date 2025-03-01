@@ -1,0 +1,16 @@
+importlib_resources
+mixpanel
+posthog
+configargparse
+pyperclip
+pydub
+pathspec
+pexpect
+psutil
+pypandoc
+pyttsx3
+grep_ast
+diskcache
+diff_match_patch
+watchfiles
+numpy
